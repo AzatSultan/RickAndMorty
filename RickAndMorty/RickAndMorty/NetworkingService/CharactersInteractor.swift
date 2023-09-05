@@ -10,18 +10,16 @@ import Foundation
 protocol CharactersInteractorProtocol {
   func getAllUrls()
   func getCharacters()
+  func getCharactersByUrl(url: String)
 }
 
 class CharactersInteractor: CharactersInteractorProtocol {
   weak var vc: CharactersVCProtocol?
   
   let networkingManager = NetworkingManager()
-  var netModel: [NetworkCharactersResult] = []
-  var netModelEpisode: [NetworkEpisodeResult] = []
-  var charactersEpisodeIds: [Int] = []
-  var charactersEpisodesUrl = ""
-  var charactersList: [Characters] = []
-//  public var charactersListCompletion: (() -> Void)?
+//  var netModel: [NetworkCharactersResult] = []
+//  var netModelEpisode: [NetworkEpisodeResult] = []
+//  var charactersList: [Characters] = []
   
   private var charactersUrl: String = ""
   private var locationsUrl: String = ""
@@ -51,10 +49,29 @@ class CharactersInteractor: CharactersInteractorProtocol {
       switch result {
       case .success(let baseNetCharacter):
         let charactersList = baseNetCharacter.results.map { Characters(netModel: $0) }
+        let nextPageUrl = baseNetCharacter.info.next
         DispatchQueue.main.async {
+          self?.vc?.getNextPageUrl(url: nextPageUrl ?? "")
           self?.vc?.updateCharacters(with: charactersList)
         }
         
+        
+      case .failure(let error):
+        print(error)
+      }
+    }
+  }
+  
+  func getCharactersByUrl(url: String) {
+    networkingManager.getCharacters(url: url) { [weak self] result in
+      switch result {
+      case .success(let baseNetCharacter):
+        let charactersList = baseNetCharacter.results.map { Characters(netModel: $0) }
+        let nextPageUrl = baseNetCharacter.info.next
+        DispatchQueue.main.async {
+          self?.vc?.updateCharacters(with: charactersList)
+          self?.vc?.getNextPageUrl(url: nextPageUrl ?? "")
+        }
         
       case .failure(let error):
         print(error)
@@ -73,16 +90,15 @@ class CharactersInteractor: CharactersInteractorProtocol {
 //    }
 //  }
   //получаем локации
-  func getLocations() {
-    networkingManager.getLocations(url: locationsUrl) { [weak self] result in
-      switch result {
-      case .success(let baseNetLocation): break
-//        print(baseNetLocation.info)
-      case .failure(let error):
-        print(error)
-      }
-    }
-  }
+//  func getLocations() {
+//    networkingManager.getLocations(url: locationsUrl) { [weak self] result in
+//      switch result {
+//      case .success(let baseNetLocation): break
+//      case .failure(let error):
+//        print(error)
+//      }
+//    }
+//  }
   
   
 }

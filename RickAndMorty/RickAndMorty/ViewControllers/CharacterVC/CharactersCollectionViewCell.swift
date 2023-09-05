@@ -66,19 +66,20 @@ class CharactersCollectionViewCell: UICollectionViewCell {
   override func prepareForReuse() {
     super.prepareForReuse()
 //    characterName.text = nil
+    charactersImage.image = nil
   }
 }
 
 extension UIImageView {
-    func load(url: URL) {
-        DispatchQueue.global().async { [weak self] in
-            if let data = try? Data(contentsOf: url) {
-                if let image = UIImage(data: data) {
-                    DispatchQueue.main.async {
-                        self?.image = image
-                    }
-                }
-            }
+  func load(url: URL) {
+    DispatchQueue.global().async { [weak self] in
+      if let data = try? Data(contentsOf: url) {
+        if let image = UIImage(data: data) {
+          DispatchQueue.main.async {
+            self?.image = image
+          }
         }
+      }
     }
+  }
 }
